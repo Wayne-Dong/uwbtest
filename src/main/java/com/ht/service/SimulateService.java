@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 public class SimulateService {
 
+
     @PostConstruct
     public void simulate(){
         MqttClient client;
@@ -32,7 +33,7 @@ public class SimulateService {
         MqttDeliveryToken token;
         //mqtt broker地址
         String broker = "tcp://164.70.6.143:1883";
-        String clientId = "uwbtest";
+        String clientId = "UWBTest";
         MqttMessage message = new MqttMessage();
         MemoryPersistence persistence = new MemoryPersistence();
 
@@ -52,30 +53,13 @@ public class SimulateService {
             message.setQos(1);
             message.setRetained(false);
             while (true) {
-//                tagPosition = new TagPosition();
-//                String tagPositionJson = gson.toJson(tagPosition);
-//                message.setPayload(tagPositionJson.getBytes());
-//                token = topic.publish(message);
-//                token.waitForCompletion();
-//                System.out.println(tagPositionJson);
                 for(int i = 0; i < 4; i++){
                     if(i == 0){
                         float t = 0;
                         while(t < length){
                             x = x + l;
-                            for(int j = 0; j <= count; j++){
-                                tagPosition = new TagPosition();
-                                tagPosition.setTag_id( id + j + "");
-                                tagPosition.setTag_x(x + "");
-                                tagPosition.setTag_y(y + "");
-                                String tagPositionJson = gson.toJson(tagPosition);
-                                message.setPayload(tagPositionJson.getBytes());
-                                token = topic.publish(message);
-                                token.waitForCompletion();
-                                System.out.println(tagPositionJson);
-                            }
-
                             t = t + l;
+                            sendMessage(count, x, y, id, message, topic);
                             Thread.sleep(1000);
                         }
 
@@ -84,18 +68,7 @@ public class SimulateService {
                         float t = 0;
                         while(t < width){
                             y = y + l;
-                            for(int j = 0; j <= count; j++){
-                                tagPosition = new TagPosition();
-                                tagPosition.setTag_id(id + j + "");
-                                tagPosition.setTag_y(y + "");
-                                tagPosition.setTag_x(x + "");
-                                String tagPositionJson = gson.toJson(tagPosition);
-                                message.setPayload(tagPositionJson.getBytes());
-                                token = topic.publish(message);
-                                token.waitForCompletion();
-                                System.out.println(tagPositionJson);
-
-                            }
+                            sendMessage(count, x, y, id, message, topic);
                             t = t + l;
                             Thread.sleep(1000);
                         }
@@ -106,18 +79,7 @@ public class SimulateService {
                         float t = 0;
                         while(t < length){
                             x = x - l;
-                            for(int j = 0; j <= count; j++){
-                                tagPosition = new TagPosition();
-                                tagPosition.setTag_id(id + j + "");
-                                tagPosition.setTag_x(x + "");
-                                tagPosition.setTag_y(y + "");
-                                String tagPositionJson = gson.toJson(tagPosition);
-                                message.setPayload(tagPositionJson.getBytes());
-                                token = topic.publish(message);
-                                token.waitForCompletion();
-                                System.out.println(tagPositionJson);
-
-                            }
+                            sendMessage(count, x, y, id, message, topic);
                             t = t + l;
                             Thread.sleep(1000);
                         }
@@ -128,18 +90,7 @@ public class SimulateService {
                         float t = 0;
                         while(t < width){
                             y = y - l;
-                            for(int j = 0; j <= count; j++){
-                                tagPosition = new TagPosition();
-                                tagPosition.setTag_id(id + j + "");
-                                tagPosition.setTag_y(y + "");
-                                tagPosition.setTag_x(x + "");
-                                String tagPositionJson = gson.toJson(tagPosition);
-                                message.setPayload(tagPositionJson.getBytes());
-                                token = topic.publish(message);
-                                token.waitForCompletion();
-                                System.out.println(tagPositionJson);
-
-                            }
+                            sendMessage(count, x, y, id, message, topic);
                             t = t + l;
                             Thread.sleep(1000);
                         }
@@ -165,5 +116,24 @@ public class SimulateService {
         List<TagPosition> tagPositions = new ArrayList<>();
 
         return tagPositions;
+    }
+    private void sendMessage(int count,float x, float y, int id, MqttMessage message, MqttTopic topic){
+        for(int j = 0; j <= count; j++){
+            TagPosition tagPosition = new TagPosition();
+            tagPosition.setTag_id( id + j + "");
+            tagPosition.setTag_x(x + "");
+            tagPosition.setTag_y(y + "");
+            Gson gson = new Gson();
+            String tagPositionJson = gson.toJson(tagPosition);
+            message.setPayload(tagPositionJson.getBytes());
+            try{
+                MqttToken token = topic.publish(message);
+                token.waitForCompletion();
+                System.out.println(tagPositionJson);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
     }
 }
